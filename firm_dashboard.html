@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AuditBridge | Firm Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+}
+
+/* TOP BAR */
+.topbar {
+    height: 55px;
+    background: #1e3c72;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.menu-btn {
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.topbar h1 {
+    font-size: 18px;
+}
+
+/* SIDEBAR */
+.sidebar {
+    position: fixed;
+    top: 55px;
+    left: -260px;
+    width: 260px;
+    height: 100%;
+    background: #0f2a44;
+    color: white;
+    transition: 0.3s;
+    padding-top: 20px;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar a {
+    display: block;
+    padding: 15px 25px;
+    text-decoration: none;
+    color: white;
+    font-size: 15px;
+}
+
+.sidebar a:hover {
+    background: #1e3c72;
+}
+
+/* MAIN CONTENT */
+.main {
+    padding: 30px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.dashboard {
+    padding: 20px;
+}
+
+/* STATS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.stat-card h3 {
+    font-size: 14px;
+    color: #666;
+}
+
+.stat-card p {
+    font-size: 28px;
+    color: #1e3c72;
+    font-weight: bold;
+}
+
+/* SECTIONS */
+.section {
+    margin-bottom: 40px;
+}
+
+.section h2 {
+    margin-bottom: 15px;
+    color: #1e3c72;
+}
+
+/* ACTIVITY */
+.activity-card {
+    background: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid #1e3c72;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+.table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.table th, .table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.table th {
+    background: #1e3c72;
+    color: white;
+}
+
+.pending {
+    color: #b36b00;
+    font-weight: bold;
+}
+
+/* PROGRESS */
+.progress-card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border-radius: 6px;
+}
+
+.progress-bar {
+    background: #e0e0e0;
+    height: 10px;
+    border-radius: 10px;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 10px;
+    background: #1e3c72;
+    border-radius: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <span class="menu-btn" onclick="toggleMenu()">☰</span>
+    <h1>AuditBridge | CA Firm Dashboard</h1>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <a href="add_client.html">Add New Client</a>
+    <a href="view_clients.html">View Clients</a>
+    <a href="#">Settings</a>
+    <a href="index.html">Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="card">
+        <h3>Welcome, CA Sharma & Co.</h3>
+        <p>Use the menu to manage clients and audits.</p>
+    </div>
+
+    <div class="dashboard">
+
+    <!-- STATS ROW -->
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Total Clients</h3>
+            <p>12</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Audits Ongoing</h3>
+            <p>7</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Documents Submitted</h3>
+            <p>58</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Pending Documents</h3>
+            <p>14</p>
+        </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="section">
+        <h2>Recent Activity</h2>
+
+        <div class="activity-card">
+            ✔ ABC Traders uploaded Sales Invoices
+        </div>
+        <div class="activity-card">
+            ✔ XYZ Enterprises submitted Balance Sheet
+        </div>
+        <div class="activity-card">
+            ⏳ PQR Services pending Bank Statements
+        </div>
+        <div class="activity-card">
+            ✔ MNO Retail uploaded Expense Register
+        </div>
+    </div>
+
+    <!-- PENDING DOCUMENTS -->
+    <div class="section">
+        <h2>Pending Documents</h2>
+
+        <table class="table">
+            <tr>
+                <th>Client</th>
+                <th>Audit</th>
+                <th>Document</th>
+                <th>Status</th>
+            </tr>
+
+            <tr>
+                <td>ABC Traders</td>
+                <td>GST Audit</td>
+                <td>Bank Statements</td>
+                <td class="pending">Pending</td>
+            </tr>
+
+            <tr>
+                <td>PQR Services</td>
+                <td>Internal Audit</td>
+                <td>Salary Sheet</td>
+                <td class="pending">Pending</td>
+            </tr>
+
+            <tr>
+                <td>LMN Pvt Ltd</td>
+                <td>Statutory Audit</td>
+                <td>Notes to Accounts</td>
+                <td class="pending">Pending</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- CLIENT PROGRESS -->
+    <div class="section">
+        <h2>Client Audit Progress</h2>
+
+        <div class="progress-card">
+            <strong>ABC Traders (GST Audit)</strong>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 80%"></div>
+            </div>
+        </div>
+
+        <div class="progress-card">
+            <strong>XYZ Enterprises (Statutory Audit)</strong>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div class="progress-card">
+            <strong>PQR Services (Internal Audit)</strong>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 60%"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+function toggleMenu() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

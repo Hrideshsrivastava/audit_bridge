@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AuditBridge | Firm Authorization</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+        }
+
+        .auth-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+            .left-panel {
+    width: 65%;
+    background: linear-gradient(
+        135deg,
+        #0f1e3c,
+        #1e3c72
+    );
+    color: #fff;
+    position: relative;
+}
+
+
+        .overlay {
+            padding: 80px;
+        }
+
+        .left-panel h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .tagline {
+            font-size: 20px;
+            margin-bottom: 40px;
+            color: #cfd8ff;
+        }
+
+        .version p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 80px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            width: 35%;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 80%;
+        }
+
+        .login-box h2 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .login-box label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 20px 0;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .login-box input:focus {
+            border-bottom-color: #1e3c72;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1e3c72;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .login-btn:hover {
+            background: #16305a;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 10px 0;
+            color: #999;
+        }
+
+        .create-link,
+        .back-link {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .create-link {
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        .back-link {
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <!-- LEFT SECTION -->
+    <div class="left-panel">
+        <div class="overlay">
+            <h1>Welcome to AuditBridge</h1>
+            <p class="tagline">
+                Secure collaboration platform<br>
+                for CA firms and their clients
+            </p>
+
+            <div class="version">
+                <p>Product Version: v1.0</p>
+                <p>Firm Portal</p>
+            </div>
+
+            <div class="footer">
+                Powered by AuditBridge © 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div class="right-panel">
+        <div class="login-box">
+            <h2>SIGN IN TO YOUR ACCOUNT</h2>
+
+            <label>Firm Email / User ID *</label>
+            <input type="text" placeholder="Enter your User ID">
+
+            <label>Password *</label>
+            <input type="password" placeholder="Enter your password">
+
+           <a href="firm_dashboard.html">
+    <button class="login-btn">LOGIN</button>
+</a>
+
+            <p class="divider">or</p>
+
+            <a href="firm-signup.html" class="create-link">
+                Create New Firm Account
+            </a>
+
+            <a href="index.html" class="back-link">
+                ⬅ Back to Home
+            </a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
