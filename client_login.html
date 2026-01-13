@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AuditBridge | Client Login</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.login-card {
+    background: white;
+    color: #333;
+    padding: 35px;
+    width: 380px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.login-card h1 {
+    margin-bottom: 10px;
+    color: #1e3c72;
+}
+
+.login-card p {
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #1e3c72;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #16305a;
+}
+
+.note {
+    font-size: 12px;
+    margin-top: 15px;
+    color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-card">
+    <h1>Client Access</h1>
+    <p>Enter the access code shared by your CA firm</p>
+
+    <input type="text" placeholder="Enter Firm Access Code">
+
+    <!-- DEMO LOGIN -->
+    <a href="client_dashboard.html">
+        <button>LOGIN</button>
+    </a>
+
+    <div class="note">
+        Code is provided by your CA firm
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AuditBridge | View Clients</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    padding: 30px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    color: #1e3c72;
+}
+
+/* SEARCH */
+.search-box input {
+    padding: 10px 14px;
+    width: 260px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* CLIENT GRID */
+.client-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* CLIENT CARD */
+.client-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.client-card h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.audit-type {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* DOCUMENT LIST */
+.doc {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* STATUS */
+.status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.submitted {
+    background: #e6f4ea;
+    color: #2e7d32;
+}
+
+.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.pdf {
+    color: #1e3c72;
+    text-decoration: none;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>Client Audit Overview</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search client name..." onkeyup="searchClients()">
+    </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="client-grid" id="clientGrid"></div>
+
+<script>
+// CLIENT DATA (Alphabetically sorted)
+const clients = [
+    {
+        name: "ABC Traders",
+        audit: "GST Audit",
+        docs: [
+            { name: "Sales Invoices", status: "submitted" },
+            { name: "Bank Statements", status: "pending" }
+        ]
+    },
+    {
+        name: "MNO Retail",
+        audit: "Internal Audit",
+        docs: [
+            { name: "Expense Register", status: "submitted" }
+        ]
+    },
+    {
+        name: "PQR Services",
+        audit: "Internal Audit",
+        docs: [
+            { name: "Expense Register", status: "submitted" },
+            { name: "Salary Sheet", status: "submitted" }
+        ]
+    },
+    {
+        name: "XYZ Enterprises",
+        audit: "Statutory Audit",
+        docs: [
+            { name: "Balance Sheet", status: "submitted" },
+            { name: "Profit & Loss", status: "submitted" }
+        ]
+    }
+];
+
+// SORT CLIENTS A → Z
+clients.sort((a, b) => a.name.localeCompare(b.name));
+
+const grid = document.getElementById("clientGrid");
+
+// RENDER CLIENT CARDS
+function renderClients(data) {
+    grid.innerHTML = "";
+
+    data.forEach(client => {
+        let card = document.createElement("div");
+        card.className = "client-card";
+
+        let docsHTML = "";
+        client.docs.forEach(doc => {
+            docsHTML += `
+                <div class="doc">
+                    <span>${doc.name}</span>
+                    <span class="status ${doc.status}">
+                        ${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                    </span>
+                </div>
+            `;
+        });
+
+        card.innerHTML = `
+            <h2>${client.name}</h2>
+            <div class="audit-type">${client.audit}</div>
+            ${docsHTML}
+            <br>
+            <a href="#" class="pdf">View Uploaded PDFs</a>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+// SEARCH FUNCTION
+function searchClients() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const filtered = clients.filter(c =>
+        c.name.toLowerCase().includes(query)
+    );
+    renderClients(filtered);
+}
+
+// INITIAL LOAD
+renderClients(clients);
+</script>
+
+</body>
+</html>
