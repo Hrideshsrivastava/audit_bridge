@@ -1,5 +1,5 @@
 
-# AuditBridge 🌉
+# AuditBridge 
 
 **Professional Document Management Platform for Chartered Accountants & Audit Firms**
 
@@ -7,7 +7,7 @@ AuditBridge solves the chaos of tax season by replacing WhatsApp uploads and los
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 ### For CA Firms (The Dashboard)
 * **Client Management:** Add new clients and assign specific audit types (GST, Income Tax, ROC).
@@ -23,7 +23,7 @@ AuditBridge solves the chaos of tax season by replacing WhatsApp uploads and los
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 * **Frontend:** HTML5, CSS3 (Modern Flexbox/Grid), Vanilla JavaScript (ES6+).
 * **Backend:** Node.js, Express.js.
@@ -33,7 +33,7 @@ AuditBridge solves the chaos of tax season by replacing WhatsApp uploads and los
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 Follow these steps to run the project locally.
 
@@ -121,8 +121,6 @@ The project uses a relational schema with **Row Level Security (RLS)** to ensure
 
 ---
 
-**Built with 💙 for the Indian CA Community.**
 
-```
 
 ```
