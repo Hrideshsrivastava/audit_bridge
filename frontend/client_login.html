@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Login | AuditBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="login-box">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">Client Portal Access</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Enter your access key to continue</p>
+      </div>
+
+      <form id="clientLoginForm">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">
+          Access Key
+          <span style="color: #64748b; font-weight: 400; font-size: 0.85rem;">(Provided by your CA)</span>
+        </label>
+        <input 
+          id="key" 
+          type="text" 
+          placeholder="Enter your access key" 
+          required
+          style="font-family: 'Courier New', monospace;">
+
+        <div id="errorMessage" style="display: none; padding: 0.75rem; background: #fee2e2; color: #dc2626; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
+
+        <button type="submit" id="loginBtn" class="btn-primary">
+          <span id="loginText">Access Portal</span>
+          <span id="loginSpinner" style="display: none;">Verifying...</span>
+        </button>
+      </form>
+
+      <div style="margin-top: 2rem; padding: 1rem; background: #f1f5f9; border-radius: 8px; font-size: 0.9rem; color: #475569;">
+        <div style="font-weight: 600; margin-bottom: 0.5rem; color: #1e293b;">📋 First Time User?</div>
+        <p style="margin: 0;">Your Chartered Accountant will provide you with an access key via email. Use that key to access your documents.</p>
+      </div>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="index.html" style="color: #2563eb; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+          ← Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch } from "./js/api.js";
+
+    const showError = (message) => {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    };
+
+    const setLoading = (button, isLoading) => {
+      button.disabled = isLoading;
+      document.getElementById('loginText').style.display = isLoading ? 'none' : 'inline';
+      document.getElementById('loginSpinner').style.display = isLoading ? 'inline' : 'none';
+      button.style.opacity = isLoading ? '0.7' : '1';
+    };
+
+    document.getElementById("clientLoginForm").onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const access_key = document.getElementById("key").value.trim();
+      const btn = document.getElementById("loginBtn");
+
+      if (!access_key) {
+        showError("Please enter your access key");
+        return;
+      }
+
+      setLoading(btn, true);
+
+      try {
+        const res = await apiFetch("/auth/client/activate", {
+          method: "POST",
+          body: JSON.stringify({
+            access_key,
+            password: "client123" // Default password
+          })
+        });
+
+        localStorage.setItem("token", res.token);
+        window.location.href = "client_dashboard.html";
+      } catch (err) {
+        showError(err.message || "Invalid access key. Please check and try again.");
+        setLoading(btn, false);
+      }
+    };
+  </script>
+
+  <style>
+    .btn-primary {
+      width: 100%;
+      padding: 0.875rem;
+      margin: 0.5rem 0;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  </style>
+</body>
+</html>
