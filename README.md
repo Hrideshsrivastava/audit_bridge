@@ -90,7 +90,7 @@ The server will start on `http://localhost:3000`.
 
 ---
 
-## 🗄️ Database Schema
+##  Database Schema
 
 The project uses a relational schema with **Row Level Security (RLS)** to ensure data isolation.
 
@@ -102,7 +102,7 @@ The project uses a relational schema with **Row Level Security (RLS)** to ensure
 
 ---
 
-## 🧪 How to Test
+##  How to Test
 
 1. **Register Firm:** Open `firm_auth.html` and sign up.
 2. **Add Client:** In the dashboard, click **"+ Add Client"**. Select "GST Audit".
@@ -113,7 +113,7 @@ The project uses a relational schema with **Row Level Security (RLS)** to ensure
 
 ---
 
-## 🛡️ Security Highlights
+##  Security Highlights
 
 * **RLS (Row Level Security):** Ensures Firm A can never access Firm B's clients, even if the API is compromised.
 * **JWT Auth:** Stateless authentication for secure API requests.
