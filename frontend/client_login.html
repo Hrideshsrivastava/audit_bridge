@@ -46,54 +46,9 @@
       </div>
     </div>
   </div>
+  <script type="module" src="js/auth_client.js"></script>
 
-  <script type="module">
-    import { apiFetch } from "./js/api.js";
-
-    const showError = (message) => {
-      const errorDiv = document.getElementById('errorMessage');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-    };
-
-    const setLoading = (button, isLoading) => {
-      button.disabled = isLoading;
-      document.getElementById('loginText').style.display = isLoading ? 'none' : 'inline';
-      document.getElementById('loginSpinner').style.display = isLoading ? 'inline' : 'none';
-      button.style.opacity = isLoading ? '0.7' : '1';
-    };
-
-    document.getElementById("clientLoginForm").onsubmit = async (e) => {
-      e.preventDefault();
-      
-      const access_key = document.getElementById("key").value.trim();
-      const btn = document.getElementById("loginBtn");
-
-      if (!access_key) {
-        showError("Please enter your access key");
-        return;
-      }
-
-      setLoading(btn, true);
-
-      try {
-        const res = await apiFetch("/auth/client/activate", {
-          method: "POST",
-          body: JSON.stringify({
-            access_key,
-            password: "client123" // Default password
-          })
-        });
-
-        localStorage.setItem("token", res.token);
-        window.location.href = "client_dashboard.html";
-      } catch (err) {
-        showError(err.message || "Invalid access key. Please check and try again.");
-        setLoading(btn, false);
-      }
-    };
-  </script>
-
+ 
   <style>
     .btn-primary {
       width: 100%;

@@ -71,7 +71,7 @@ async function loadDashboard() {
            <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">${c.submittedDocuments}/${c.totalDocuments} Docs</div>
         </div>
         <div style="text-align:center">
-          <button class="btn-upload" style="background:white; border:1px solid #e2e8f0; color:#334155;" onclick="window.location.href='view_clients.html?clientId=${c.clientId}'">View</button>
+          <button class="btn-upload" style="background:white; border:1px solid #e2e8f0; color:#334155;" onclick="window.location.href='view_client.html?clientId=${c.clientId}'">View</button>
         </div>
       `;
       container.appendChild(row);
