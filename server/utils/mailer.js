@@ -1,32 +1,25 @@
 /* server/utils/mailer.js */
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-// 1. Setup your email provider (Using Port 587 for Render compatibility)
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",  // ✅ Explicitly set host
-  port: 587,               // ✅ Use Port 587 (Standard for Cloud Hosting)
-  secure: false,           // ✅ Must be false for port 587 (It uses STARTTLS automatically)
-  auth: {
-    user: process.env.COMPANY_EMAIL,
-    pass: process.env.COMPANY_EMAIL_PASSWORD
-  }
-});
+// Initialize Resend with the key from your .env / Render Environment
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// 2. Generic Send Function
-const sendEmail = async ({ to, subject, html }) => {
+exports.sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"AuditBridge System" <${process.env.COMPANY_EMAIL}>`,
-      to: to,
+    // NOTE: On the free tier, you can ONLY send emails to the address 
+    // you signed up with (your own email).
+    const data = await resend.emails.send({
+      from: "AuditBridge <onboarding@resend.dev>", // Use their free testing domain
+      to: to, 
       subject: subject,
       html: html
     });
-    console.log(`📧 Email sent: ${info.messageId}`);
+    
+    console.log("✅ Email Sent via Resend:", data.id);
     return true;
   } catch (err) {
-    console.error("❌ Email failed:", err);
-    return false;
+    console.error("❌ Email Failed:", err);
+    // Return true anyway so the upload doesn't fail just because email failed
+    return true; 
   }
 };
-
-module.exports = { sendEmail };
