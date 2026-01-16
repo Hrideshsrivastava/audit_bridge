@@ -1,7 +1,7 @@
 /* frontend/js/client_dashboard.js */
 import { apiFetch } from "./api.js";
 import { requireAuth, logout } from "./auth_guard.js";
-
+import { API_BASE } from "./api.js";
 requireAuth();
 window.logout = logout;
 
@@ -246,7 +246,7 @@ document.addEventListener("change", async (e) => {
       const fd = new FormData();
       fd.append("file", file);
 
-      const response = await fetch(`http://localhost:3000/client/document/${docId}/upload`, {
+      const response = await fetch(`${API_BASE}/client/document/${docId}/upload`, {
         method: "POST",
         headers: { 
           Authorization: `Bearer ${localStorage.getItem("token")}` 
