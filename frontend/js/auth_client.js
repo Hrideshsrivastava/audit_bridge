@@ -1,59 +1,90 @@
 /* frontend/js/auth_client.js */
 import { apiFetch } from "./api.js";
 
-// 1. Target the FORM, not the button
-const form = document.getElementById("clientLoginForm");
+const showError = (msg) => {
+  const el = document.getElementById("errorMessage");
+  if (el) {
+    el.innerText = msg;
+    el.style.display = "block";
+  } else {
+    alert(msg);
+  }
+};
 
-// 2. Add Safety Check: Does the form exist?
-if (form) {
-  form.onsubmit = async (e) => {
-    e.preventDefault(); // STOP page reload
+/* ============================
+   1. RETURNING USER LOGIN
+   (Email + Password)
+   ============================ */
+const loginForm = document.getElementById("loginForm");
 
-    // 3. Define the input explicitly (fixes 'key is not defined' error)
-    const keyInput = document.getElementById("key");
-    const access_key = keyInput.value.trim();
-    
-    // UI Elements
+if (loginForm) {
+  loginForm.onsubmit = async (e) => {
+    e.preventDefault();
     const btn = document.getElementById("loginBtn");
-    const loginText = document.getElementById("loginText");
-    const spinner = document.getElementById("loginSpinner");
-    const errorDiv = document.getElementById("errorMessage");
-
-    if (!access_key) {
-      errorDiv.textContent = "Please enter an Access Key";
-      errorDiv.style.display = "block";
-      return;
-    }
-
-    // Loading State
+    const originalText = btn.innerText;
+    
+    // UI Loading State
     btn.disabled = true;
-    loginText.style.display = "none";
-    spinner.style.display = "inline";
-    errorDiv.style.display = "none";
-
+    btn.innerText = "Verifying...";
+    
     try {
-      const res = await apiFetch("/auth/client/activate", {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      const res = await apiFetch("/auth/client/login", {
         method: "POST",
-        body: JSON.stringify({
-          access_key,
-          password: "client123" 
-        })
+        body: JSON.stringify({ email, password })
       });
 
+      // Success: Save token & redirect
       localStorage.setItem("token", res.token);
       window.location.href = "client_dashboard.html";
 
     } catch (err) {
-      console.error("Login Error:", err);
-      errorDiv.textContent = err.message || "Invalid Access Key";
-      errorDiv.style.display = "block";
-      
-      // Reset Button
+      showError(err.message || "Login failed");
       btn.disabled = false;
-      loginText.style.display = "inline";
-      spinner.style.display = "none";
+      btn.innerText = originalText;
     }
   };
-} else {
-  console.error("Error: Could not find form with id 'clientLoginForm'. Check your HTML.");
+}
+
+/* ============================
+   2. FIRST TIME ACTIVATION
+   (Access Key -> Set Password)
+   ============================ */
+const activateForm = document.getElementById("activateForm");
+
+if (activateForm) {
+  activateForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("activateBtn");
+    const originalText = btn.innerText;
+
+    // UI Loading State
+    btn.disabled = true;
+    btn.innerText = "Activating...";
+
+    try {
+      const access_key = document.getElementById("accessKey").value.trim();
+      const password = document.getElementById("newPassword").value.trim();
+
+      const res = await apiFetch("/auth/client/activate", {
+        method: "POST",
+        body: JSON.stringify({ access_key, password })
+      });
+
+      // Success: Save token
+      localStorage.setItem("token", res.token);
+      
+      // IMPORTANT: Tell the user their Login ID (Email)
+      alert(`Success! Your account is active.\n\nYour Login ID is: ${res.email}\nPlease use this email to log in next time.`);
+      
+      window.location.href = "client_dashboard.html";
+
+    } catch (err) {
+      showError(err.message || "Activation failed");
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  };
 }

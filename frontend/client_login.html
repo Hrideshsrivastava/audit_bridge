@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -75,5 +75,121 @@
       opacity: 0.7;
     }
   </style>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Login | AuditBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Tab Styling */
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      background: none;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: #2563eb;
+      background: #f8fafc;
+    }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom: 2px solid #2563eb;
+      margin-bottom: -2px;
+    }
+    
+    /* Toggle Forms */
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="login-box">
+      
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <h2 style="margin-bottom: 0.5rem;">Client Portal</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Secure Document Submission</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" onclick="switchTab('activate')">First Time?</button>
+      </div>
+
+      <form id="loginForm" class="auth-form active">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required
+               style="width: 100%; padding: 10px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+        
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password" required
+               style="width: 100%; padding: 10px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+
+        <button type="submit" class="btn-primary" id="loginBtn" style="width:100%; margin-top:0.5rem;">Login</button>
+      </form>
+
+      <form id="activateForm" class="auth-form">
+        <div style="background:#eff6ff; padding:0.75rem; border-radius:6px; margin-bottom:1rem; font-size:0.85rem; color:#1e40af;">
+          ℹ️ Enter the Access Key provided by your CA to create your account.
+        </div>
+
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Access Key</label>
+        <input type="text" id="accessKey" placeholder="e.g. 8f3a..." required
+               style="width: 100%; padding: 10px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-family: monospace;">
+        
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Create Password</label>
+        <input type="password" id="newPassword" placeholder="Min. 6 characters" required minlength="6"
+               style="width: 100%; padding: 10px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+
+        <button type="submit" class="btn-primary" id="activateBtn" style="width:100%; margin-top:0.5rem;">Activate Account</button>
+      </form>
+
+      <div id="errorMessage" style="display:none; padding:0.75rem; background:#fee2e2; color:#dc2626; border-radius:6px; margin-top:1rem; font-size:0.9rem;"></div>
+      
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="index.html" style="color: #2563eb; text-decoration: none; font-size: 0.9rem;">← Back to Home</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="js/auth_client.js"></script>
+  
+  <script>
+    // Tab Switching Logic
+    window.switchTab = (tab) => {
+      // 1. Reset buttons
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      // 2. Hide all forms
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      
+      // 3. Hide errors
+      document.getElementById('errorMessage').style.display = 'none';
+
+      // 4. Activate selected tab
+      if(tab === 'login') {
+        document.querySelector('button[onclick="switchTab(\'login\')"]').classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+      } else {
+        document.querySelector('button[onclick="switchTab(\'activate\')"]').classList.add('active');
+        document.getElementById('activateForm').classList.add('active');
+      }
+    };
+  </script>
 </body>
 </html>
