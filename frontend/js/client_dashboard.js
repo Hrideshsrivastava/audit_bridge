@@ -1,4 +1,4 @@
-/* frontend/js/client_dashboard.js - Enhanced Version */
+/* frontend/js/client_dashboard.js */
 import { apiFetch } from "./api.js";
 import { requireAuth, logout } from "./auth_guard.js";
 
@@ -6,9 +6,6 @@ requireAuth();
 window.logout = logout;
 
 let uploadingDocuments = new Set();
-
-/* frontend/js/client_dashboard.js */
-/* frontend/js/client_dashboard.js */
 
 async function loadDashboard() {
   try {
@@ -27,19 +24,24 @@ async function loadDashboard() {
         document.getElementById("auditType").innerText = docs[0].auditType;
     }
 
-    // 2. Update Deadline Card (Closest or Passed)
-    const validDates = docs
-        .map(d => d.dueDate ? new Date(d.dueDate) : null)
-        .filter(d => d !== null);
-    
+    // ============================================================
+    // ✅ 2. MODIFIED: Update Deadline Card (Next Actionable Item)
+    // ============================================================
     const deadlineEl = document.getElementById("deadline");
+
+    // Filter: Exclude finished items (uploaded/submitted/verified).
+    // Keep 'pending' and 'rejected' items.
+    const actionableDocs = docs.filter(d => 
+        !['uploaded', 'verified', 'submitted'].includes(d.status) && d.dueDate
+    );
     
-    if (validDates.length > 0) {
+    if (actionableDocs.length > 0) {
         // Sort dates ASCENDING (Earliest first)
-        validDates.sort((a, b) => a - b);
+        actionableDocs.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         
-        // Pick the CLOSEST date (Index 0)
-        const closest = validDates[0];
+        // Pick the CLOSEST pending date (Index 0)
+        const nextDoc = actionableDocs[0];
+        const closest = new Date(nextDoc.dueDate);
         
         // Check Urgency for the Card
         const today = new Date();
@@ -63,10 +65,19 @@ async function loadDashboard() {
             deadlineEl.style.fontWeight = "600";
         }
     } else {
-        deadlineEl.innerText = "No Deadline";
-        deadlineEl.style.color = "#1e293b";
+        // Handle case where everything is done
+        if (total > 0 && total === submitted) {
+            deadlineEl.innerText = "All Submitted";
+            deadlineEl.style.color = "#10b981"; // Green
+        } else {
+            deadlineEl.innerText = "No Deadline";
+            deadlineEl.style.color = "#1e293b";
+        }
     }
-    // -----------------------
+    // ============================================================
+    // END OF MODIFICATION
+    // ============================================================
+
 
     // Render List
     const container = document.getElementById("docsList");
@@ -192,9 +203,6 @@ async function loadDashboard() {
     alert("Failed to load dashboard.");
   }
 }
-
-
-
 
 // Enhanced File Upload Handler with Error Handling
 document.addEventListener("change", async (e) => {
