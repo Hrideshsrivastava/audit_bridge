@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firm Login | AuditBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="login-box">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">Firm Login</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Access your firm dashboard</p>
+      </div>
+
+      <form id="authForm">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Email Address</label>
+        <input 
+          id="email" 
+          type="email" 
+          placeholder="firm@example.com" 
+          required
+          autocomplete="email">
+        
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569;">Password</label>
+        <input 
+          id="password" 
+          type="password" 
+          placeholder="Enter your password" 
+          required
+          autocomplete="current-password">
+
+        <div id="errorMessage" style="display: none; padding: 0.75rem; background: #fee2e2; color: #dc2626; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
+
+        <button type="button" id="firmLogin" class="btn-primary">
+          <span id="loginText">Login</span>
+          <span id="loginSpinner" style="display: none;">Logging in...</span>
+        </button>
+        
+        <button type="button" id="firmRegister" class="btn-secondary">
+          <span id="registerText">Register New Firm</span>
+          <span id="registerSpinner" style="display: none;">Creating account...</span>
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="index.html" style="color: #2563eb; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+          ← Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+<script type="module" src="js/auth_firm.js"></script>
+  <!-- <script type="module">
+    import { apiFetch } from "./js/api.js";
+
+    const showError = (message) => {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => errorDiv.style.display = 'none', 5000);
+    };
+
+    const setLoading = (button, isLoading, textId, spinnerId) => {
+      button.disabled = isLoading;
+      document.getElementById(textId).style.display = isLoading ? 'none' : 'inline';
+      document.getElementById(spinnerId).style.display = isLoading ? 'inline' : 'none';
+      button.style.opacity = isLoading ? '0.7' : '1';
+    };
+
+    // Login
+    document.getElementById("firmLogin").onclick = async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const btn = e.target;
+
+      if (!email || !password) {
+        showError("Email and password are required");
+        return;
+      }
+
+      setLoading(btn, true, 'loginText', 'loginSpinner');
+
+      try {
+        const res = await apiFetch("/auth/firm/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password })
+        });
+
+        localStorage.setItem("token", res.token);
+        window.location.href = "firm_dashboard.html";
+      } catch (err) {
+        showError(err.message || "Login failed. Please check your credentials.");
+        setLoading(btn, false, 'loginText', 'loginSpinner');
+      }
+    };
+
+    // Register
+    document.getElementById("firmRegister").onclick = async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const btn = e.target;
+
+      if (!email || !password) {
+        showError("Email and password are required");
+        return;
+      }
+
+      if (password.length < 6) {
+        showError("Password must be at least 6 characters long");
+        return;
+      }
+
+      setLoading(btn, true, 'registerText', 'registerSpinner');
+
+      try {
+        await apiFetch("/auth/firm/signup", {
+          method: "POST",
+          body: JSON.stringify({
+            name: email.split('@')[0] + " Firm",
+            email,
+            password
+          })
+        });
+
+        // Auto-login after signup
+        const login = await apiFetch("/auth/firm/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password })
+        });
+
+        localStorage.setItem("token", login.token);
+        window.location.href = "firm_dashboard.html";
+      } catch (err) {
+        showError(err.message || "Registration failed. Email may already be in use.");
+        setLoading(btn, false, 'registerText', 'registerSpinner');
+      }
+    };
+  </script> -->
+
+  <style>
+    .btn-primary, .btn-secondary {
+      width: 100%;
+      padding: 0.875rem;
+      margin: 0.5rem 0;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #2563eb;
+      border: 2px solid #2563eb;
+    }
+
+    .btn-secondary:hover {
+      background: #eff6ff;
+    }
+
+    .btn-primary:disabled, .btn-secondary:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Documents | AuditBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">AuditBridge <span style="font-weight:400; opacity:0.8">| Client Review</span></div>
+    <div>
+      <a href="firm_dashboard.html" style="color: #60a5fa; text-decoration: none; margin-right: 2rem;">← Back to Dashboard</a>
+      <span onclick="logout()" class="logout-link" style="cursor: pointer;">Logout</span>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div style="margin-bottom: 2rem;">
+      <h2 style="font-size:1.8rem; color:#f0f1f1; margin-bottom: 0.5rem;" id="clientName">Loading...</h2>
+      <p style="color: #64748b;" id="clientInfo">Loading client information...</p>
+    </div>
+
+    <div class="content-card">
+      <div class="list-header" style="grid-template-columns: 2fr 1.5fr 1fr 2.5fr;">
+  <div>Document Name</div>
+  <div>Due Date</div> <div style="text-align: center;">File</div>
+  <div style="text-align:center">Actions</div>
+</div>
+      <div id="docsList">
+        <div style="padding: 2rem; text-align: center; color: #64748b;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+          Loading documents...
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Reject Modal -->
+  <dialog id="rejectModal" style="border: none; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 450px; width: 90%;">
+    <h3 style="color:#1e293b; margin-bottom: 1rem;">Reject Document</h3>
+    <p style="color: #64748b; margin-bottom: 1rem;">Please provide a reason for rejection:</p>
+    
+    <textarea id="rejectionReason" rows="4" placeholder="e.g. Document is not clear, missing signatures..." style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+    
+    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+      <button onclick="document.getElementById('rejectModal').close()" style="background: white; border: 2px solid #e2e8f0; color: #475569; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        Cancel
+      </button>
+      <button id="confirmReject" style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        Reject Document
+      </button>
+    </div>
+  </dialog>
+<script type="module" src="js/firm_clients.js"></script>
+  <!-- <script type="module">
+    import { apiFetch } from "./js/api.js";
+    import { requireFirmAuth, logout } from "./js/auth_guard.js";
+
+    requireFirmAuth();
+    window.logout = logout;
+
+    const clientId = new URLSearchParams(location.search).get("clientId");
+    let currentDocId = null;
+
+    if (!clientId) {
+      alert("Invalid client ID");
+      window.location.href = "firm_dashboard.html";
+    }
+
+    async function loadClient() {
+      try {
+        const data = await apiFetch(`/firm/client/${clientId}`);
+        
+        document.getElementById("clientName").innerText = data.clientName;
+        document.getElementById("clientInfo").innerText = 
+          `${data.auditType} | ${data.financialYear} | ${data.email}`;
+
+        const container = document.getElementById("docsList");
+        container.innerHTML = "";
+
+        if (!data.documents || data.documents.length === 0) {
+          container.innerHTML = `
+            <div style="padding:3rem; text-align:center; color:#64748b;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+              <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">No Documents</div>
+              <p style="margin: 0;">No documents have been assigned yet.</p>
+            </div>
+          `;
+          return;
+        }
+
+        data.documents.forEach(d => {
+          const row = document.createElement("div");
+          row.className = "list-row";
+          row.style.gridTemplateColumns = "2fr 2fr 1fr 2fr";
+          row.id = `doc-${d.documentId}`;
+          
+          // Status pill
+          let pillClass = "status-pending";
+          let statusText = "Pending";
+          
+          if (d.status === "submitted") { 
+            pillClass = "status-uploaded"; 
+            statusText = "Submitted"; 
+          }
+          if (d.status === "verified") { 
+            pillClass = "status-verified"; 
+            statusText = "Verified"; 
+          }
+          if (d.status === "rejected") { 
+            pillClass = "status-pending"; 
+            statusText = "Rejected"; 
+          }
+
+          // File link
+          let fileHtml = '-';
+          if (d.fileUrl) {
+            fileHtml = `<a href="${d.fileUrl}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 500;">📎 View</a>`;
+          }
+
+          // Action buttons
+          let actionsHtml = '<span style="color:#cbd5e1;">-</span>';
+          if (d.status === "submitted") {
+            actionsHtml = `
+              <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button onclick="verifyDoc('${d.documentId}')" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                  ✓ Verify
+                </button>
+                <button onclick="openRejectModal('${d.documentId}')" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                  ✗ Reject
+                </button>
+              </div>
+            `;
+          }
+
+          row.innerHTML = `
+            <div class="doc-name">${d.name}</div>
+            <div><span class="status-pill ${pillClass}">${statusText}</span></div>
+            <div style="text-align: center;">${fileHtml}</div>
+            <div style="text-align:center">${actionsHtml}</div>
+          `;
+          container.appendChild(row);
+        });
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("docsList").innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #dc2626;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">Failed to load client</div>
+            <p style="margin: 0; color: #64748b;">${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    window.verifyDoc = async (docId) => {
+      if (!confirm("Mark this document as verified?")) return;
+
+      const row = document.getElementById(`doc-${docId}`);
+      const originalContent = row.innerHTML;
+      row.style.opacity = '0.5';
+
+      try {
+        await apiFetch(`/firm/document/${docId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: "verified" })
+        });
+        
+        await loadClient();
+      } catch (err) {
+        alert("Verification failed: " + err.message);
+        row.innerHTML = originalContent;
+        row.style.opacity = '1';
+      }
+    };
+
+    window.openRejectModal = (docId) => {
+      currentDocId = docId;
+      document.getElementById("rejectionReason").value = "";
+      document.getElementById("rejectModal").showModal();
+    };
+
+    document.getElementById("confirmReject").onclick = async () => {
+      const reason = document.getElementById("rejectionReason").value.trim();
+      
+      if (!reason) {
+        alert("Please provide a rejection reason");
+        return;
+      }
+
+      const btn = document.getElementById("confirmReject");
+      btn.disabled = true;
+      btn.textContent = "Rejecting...";
+
+      try {
+        await apiFetch(`/firm/document/${currentDocId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ 
+            status: "rejected", 
+            rejectionReason: reason 
+          })
+        });
+        
+        document.getElementById("rejectModal").close();
+        await loadClient();
+      } catch (err) {
+        alert("Rejection failed: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Reject Document";
+      }
+    };
+
+    loadClient();
+  </script> -->
+</body>
+</html>

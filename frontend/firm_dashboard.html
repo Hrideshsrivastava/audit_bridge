@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firm Dashboard | AuditBridge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">AuditBridge <span style="font-weight:400; opacity:0.8">| Firm Portal</span></div>
+    <div>
+      <span onclick="logout()" class="logout-link" style="cursor: pointer;">Logout</span>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+      <h2 style="font-size:1.5rem; color:#f0ebeb;">Client Overview</h2>
+      <button id="addClientBtn" class="btn-upload" style="width:auto; padding: 10px 20px;">
+        + Add New Client
+      </button>
+    </div>
+    
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Total Clients</span>
+        <span class="metric-value" id="statTotal">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Active Audits</span>
+        <span class="metric-value" id="statActive">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Pending Reviews</span>
+        <span class="metric-value" style="color: #d97706;" id="statPending">0</span>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="list-header" style="grid-template-columns: 2fr 2fr 1fr 1fr;">
+        <div>Client Name</div>
+        <div>Audit Type</div>
+        <div>Progress</div>
+        <div style="text-align:center">Action</div>
+      </div>
+
+      <div id="clientsList">
+        <div style="padding: 2rem; text-align: center; color: #64748b;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+          Loading clients...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Client Modal -->
+  <dialog id="addClientModal" style="border: none; border-radius: 16px; padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; width: 90%;">
+    <div style="padding: 2rem;">
+      <h3 style="margin-bottom:15px; color:#1e293b;">Add New Client</h3>
+      
+      <form id="addClientForm">
+        <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Client Name</label>
+        <input name="name" required placeholder="e.g. Rahul Traders" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 6px;">
+        
+        <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Email</label>
+        <input name="email" type="email" required placeholder="client@gmail.com" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 6px;">
+        
+        <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Audit Type</label>
+        <select name="audit_type_id" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 6px;">
+          <option value="1">GST Audit</option>
+          <option value="2">Income Tax</option>
+        </select>
+        
+        <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Financial Year</label>
+        <input name="financial_year" value="2025-2026" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 6px;">
+
+        <div class="modal-actions" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" onclick="document.getElementById('addClientModal').close()" style="background:white; border:2px solid #e2e8f0; color:#475569; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight: 600;">
+            Cancel
+          </button>
+          <button type="submit" class="btn-upload" style="width:auto; padding:10px 20px;">
+            Create & Generate Key
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Success Modal -->
+  <dialog id="successModal" style="border: none; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 450px; width: 90%; text-align: center;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+    <h3 style="color:#1e293b; margin-bottom: 1rem;">Client Created Successfully!</h3>
+    <p style="color: #64748b; margin-bottom: 1.5rem;">Share this access key with your client:</p>
+    
+    <div style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 600; color: #1e293b; word-break: break-all;" id="accessKeyDisplay"></div>
+    
+    <button onclick="copyAccessKey()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 0.5rem;">
+      📋 Copy Key
+    </button>
+    <button onclick="document.getElementById('successModal').close(); location.reload();" style="background: white; border: 2px solid #e2e8f0; color: #475569; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+      Done
+    </button>
+  </dialog>
+<script type="module" src="js/firm_dashboard.js"></script>
+  <!-- <script type="module">
+    import { apiFetch } from "./js/api.js";
+    import { requireFirmAuth, logout } from "./js/auth_guard.js";
+
+    requireFirmAuth();
+    window.logout = logout;
+
+    let currentAccessKey = '';
+
+    window.copyAccessKey = () => {
+      navigator.clipboard.writeText(currentAccessKey);
+      const btn = event.target;
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy Key', 2000);
+    };
+
+    // Modal Logic
+    const modal = document.getElementById("addClientModal");
+    const addBtn = document.getElementById("addClientBtn");
+    const form = document.getElementById("addClientForm");
+
+    if(addBtn) addBtn.onclick = () => modal.showModal();
+
+    if(form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+        
+        try {
+          const res = await apiFetch("/firm/create-client", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          
+          currentAccessKey = res.accessKey;
+          document.getElementById("accessKeyDisplay").textContent = res.accessKey;
+          
+          modal.close();
+          form.reset();
+          document.getElementById("successModal").showModal();
+          
+        } catch(err) {
+          alert("Failed: " + err.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create & Generate Key';
+        }
+      };
+    }
+
+    // Dashboard Logic
+    async function loadDashboard() {
+      try {
+        const clients = await apiFetch("/firm/dashboard");
+        const container = document.getElementById("clientsList");
+        
+        // Update Stats
+        document.getElementById("statTotal").innerText = clients.length;
+        document.getElementById("statActive").innerText = clients.length;
+        
+        const pendingReviews = clients.reduce((sum, c) => 
+          sum + (c.submittedDocuments - c.verifiedDocuments), 0);
+        document.getElementById("statPending").innerText = pendingReviews;
+        
+        container.innerHTML = "";
+        
+        if (clients.length === 0) {
+          container.innerHTML = `
+            <div style="padding:3rem; text-align:center; color:#64748b;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+              <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #475569;">No Clients Yet</div>
+              <p style="margin: 0;">Click "Add New Client" to get started.</p>
+            </div>
+          `;
+          return;
+        }
+
+        clients.forEach(c => {
+          const row = document.createElement("div");
+          row.className = "list-row";
+          row.style.gridTemplateColumns = "2fr 2fr 1fr 1fr";
+          
+          const percent = c.progressPercentage || 0;
+
+          row.innerHTML = `
+            <div class="doc-name">
+              ${c.name}
+              <div style="font-size:0.8rem; color:#94a3b8; font-weight:normal;">${c.email}</div>
+            </div>
+            <div class="doc-desc">${c.auditType} (${c.financialYear})</div>
+            <div>
+              <div style="background:#f1f5f9; height:6px; width:100%; border-radius:3px; overflow:hidden;">
+                <div style="background:${percent===100 ? '#10b981' : '#2563eb'}; height:100%; width:${percent}%"></div>
+              </div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">${c.submittedDocuments}/${c.totalDocuments} Docs</div>
+            </div>
+            <div style="text-align:center">
+              <button class="btn-upload" style="background:white; border:1px solid #e2e8f0; color:#334155; padding: 8px 16px;" onclick="window.location.href='view_client.html?clientId=${c.clientId}'">
+                View
+              </button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+
+      } catch (err) {
+        console.error(err);
+        const container = document.getElementById("clientsList");
+        container.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #dc2626;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">Failed to load dashboard</div>
+            <p style="margin: 0; color: #64748b;">${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    loadDashboard();
+  </script> -->
+</body>
+</html>
