@@ -1,12 +1,14 @@
 /* server/utils/mailer.js */
 const nodemailer = require("nodemailer");
 
-// 1. Setup your email provider
+// 1. Setup your email provider (Using Port 587 for Render compatibility)
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Use 'gmail' or your SMTP host
+  host: "smtp.gmail.com",  // ✅ Explicitly set host
+  port: 587,               // ✅ Use Port 587 (Standard for Cloud Hosting)
+  secure: false,           // ✅ Must be false for port 587 (It uses STARTTLS automatically)
   auth: {
-    user: process.env.COMPANY_EMAIL, // e.g., 'yourcompany@gmail.com'
-    pass: process.env.COMPANY_EMAIL_PASSWORD // App Password (not login password)
+    user: process.env.COMPANY_EMAIL,
+    pass: process.env.COMPANY_EMAIL_PASSWORD
   }
 });
 
