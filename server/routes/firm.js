@@ -212,4 +212,28 @@ router.get("/client/:clientId", auth.firm, async (req, res) => {
   }
 });
 
+/**
+ * ✅ NEW: Update just the Due Date of a document
+ * PATCH /firm/document/:documentId/due-date
+ */
+router.patch("/document/:documentId/due-date", auth.firm, async (req, res) => {
+  const { documentId } = req.params;
+  const { due_date } = req.body; // Expect YYYY-MM-DD
+
+  try {
+    // Update the date
+    await req.db.query(
+      `update client_documents
+       set due_date = $1
+       where id = $2 and firm_id = $3`,
+      [due_date, documentId, req.firmId]
+    );
+
+    res.json({ message: "Due date updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update date" });
+  }
+});
+
 module.exports = router;

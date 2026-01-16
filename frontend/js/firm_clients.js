@@ -18,13 +18,10 @@ async function loadClientData() {
   try {
     const data = await apiFetch(`/firm/client/${clientId}`);
 
-    // Update Header Info
     document.getElementById("clientName").innerText = data.clientName;
-    document.getElementById("clientInfo").innerText = 
-      `${data.auditType} | ${data.financialYear} | ${data.email}`;
+    document.getElementById("clientInfo").innerText = `${data.auditType} | ${data.financialYear}`;
 
-    // Render Documents List (Matching your CSS Grid Layout)
-    const container = document.getElementById("docsList"); // Correct ID
+    const container = document.getElementById("docsList");
     container.innerHTML = "";
 
     if (!data.documents || data.documents.length === 0) {
@@ -34,21 +31,33 @@ async function loadClientData() {
 
     data.documents.forEach(d => {
       const row = document.createElement("div");
-      row.className = "list-row"; // Correct CSS class
-      row.style.gridTemplateColumns = "2fr 2fr 1fr 2fr"; // Match header grid
+      row.className = "list-row";
+      // Match the new HTML grid columns
+      row.style.gridTemplateColumns = "2fr 1.5fr 1fr 2.5fr"; 
 
-      // Logic for Status Colors
+      // Status Badge Logic
       let pillClass = "status-pending";
       if (d.status === "submitted") pillClass = "status-uploaded";
       if (d.status === "verified") pillClass = "status-verified";
       if (d.status === "rejected") pillClass = "status-pending";
 
-      // Logic for File Link
+      // File Link Logic
       const fileLink = d.fileUrl 
-        ? `<a href="${d.fileUrl}" target="_blank" style="color:#2563eb;font-weight:600;">View</a>` 
+        ? `<a href="${d.fileUrl}" target="_blank" style="color:#2563eb;font-weight:600;">View PDF</a>` 
         : "-";
 
-      // Logic for Action Buttons
+      // ✅ NEW: Date Picker with Auto-Save
+      // We format the date to YYYY-MM-DD for the input value
+      const dateValue = d.dueDate ? d.dueDate.split('T')[0] : '';
+      
+      const dateInput = `
+        <input type="date" 
+               value="${dateValue}" 
+               onchange="updateDueDate('${d.documentId}', this.value)"
+               style="padding:5px; border:1px solid #cbd5e1; border-radius:4px; color:#475569; font-family:inherit;">
+      `;
+
+      // Action Buttons
       let actions = "-";
       if (d.status === "submitted") {
         actions = `
@@ -61,7 +70,7 @@ async function loadClientData() {
 
       row.innerHTML = `
         <div class="doc-name">${d.name}</div>
-        <div><span class="status-pill ${pillClass}">${d.status}</span></div>
+        <div>${dateInput}</div>
         <div style="text-align:center;">${fileLink}</div>
         <div style="text-align:center;">${actions}</div>
       `;
@@ -70,9 +79,28 @@ async function loadClientData() {
 
   } catch (err) {
     console.error(err);
-    alert("Error loading client: " + err.message);
+    alert("Error: " + err.message);
   }
 }
+
+// ✅ NEW: Global function to handle Date Changes
+window.updateDueDate = async (docId, newDate) => {
+  if(!newDate) return;
+  
+  try {
+    // Visual feedback (optional)
+    // console.log("Saving date...", newDate);
+    
+    await apiFetch(`/firm/document/${docId}/due-date`, {
+      method: "PATCH",
+      body: JSON.stringify({ due_date: newDate })
+    });
+    
+    // Optional: Show a tiny "Saved" toast or notification
+  } catch (err) {
+    alert("Failed to update date: " + err.message);
+  }
+};
 
 // 4. Attach Global Functions for Buttons
 window.verify = async (id) => {

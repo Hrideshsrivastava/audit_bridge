@@ -265,6 +265,7 @@ router.get("/dashboard", auth.client, async (req, res) => {
 
 /**
  * GET /client/documents
+ * List documents ONLY for the logged-in client
  */
 router.get("/documents", auth.client, async (req, res) => {
   try {
@@ -276,9 +277,11 @@ router.get("/documents", auth.client, async (req, res) => {
         cd.due_date,
         cd.uploaded_at,
         cd.file_url,
-        ca.financial_year
+        ca.financial_year,
+        at.name as audit_type    -- ✅ 1. Get Audit Type Name
       FROM client_documents cd
       JOIN client_audits ca ON ca.id = cd.client_audit_id
+      JOIN audit_types at ON at.id = ca.audit_type_id  -- ✅ 2. Join Audit Types Table
       WHERE ca.client_id = $1
       ORDER BY cd.due_date ASC
     `, [req.clientId]);
@@ -290,7 +293,8 @@ router.get("/documents", auth.client, async (req, res) => {
       dueDate: r.due_date,
       uploadedAt: r.uploaded_at,
       fileUrl: r.file_url,
-      financialYear: r.financial_year
+      financialYear: r.financial_year,
+      auditType: r.audit_type   // ✅ 3. Send to Frontend
     })));
   } catch (err) {
     console.error(err);
