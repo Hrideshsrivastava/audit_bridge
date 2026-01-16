@@ -50,63 +50,74 @@ router.post("/create-client", auth.firm, async (req, res) => {
   }
 });
 
-/**
- * PATCH /firm/document/:documentId
- */
+/* server/routes/firm.js */
+
+// ... (imports remain the same) ...
+const { sendEmail } = require("../utils/mailer"); 
+const { documentRejected } = require("../emails/documentRejected");
+
 router.patch("/document/:documentId", auth.firm, async (req, res) => {
   const { documentId } = req.params;
   const { status, rejectionReason } = req.body;
 
-  if (!["verified", "rejected"].includes(status)) {
-    return res.status(400).json({ error: "Invalid status" });
-  }
+  if (!["verified", "rejected"].includes(status)) return res.status(400).json({ error: "Invalid status" });
 
   try {
+    // 1. Get Details + CLIENT EMAIL
     const docRes = await req.db.query(
-      `select id, status
-       from client_documents
-       where id = $1`,
+      `select 
+         cd.id, cd.status, cd.document_name,
+         c.email as client_email, c.name as client_name
+       from client_documents cd
+       join client_audits ca on ca.id = cd.client_audit_id
+       join clients c on c.id = ca.client_id 
+       where cd.id = $1`,
       [documentId]
     );
 
-    if (!docRes.rows.length) {
-      return res.status(404).json({ error: "Document not found" });
-    }
+    if (!docRes.rows.length) return res.status(404).json({ error: "Not found" });
+    const doc = docRes.rows[0];
 
-    if (docRes.rows[0].status !== "submitted") {
-      return res.status(400).json({
-        error: "Only submitted documents can be updated"
-      });
-    }
-
+    // 2. Update Status
     if (status === "verified") {
       await req.db.query(
-        `update client_documents
-         set status = 'verified', rejection_reason = null
-         where id = $1`,
+        `update client_documents set status = 'verified', rejection_reason = null where id = $1`,
         [documentId]
       );
     } else {
-      if (!rejectionReason) {
-        return res.status(400).json({ error: "Rejection reason required" });
-      }
+      // REJECTED
+      if (!rejectionReason) return res.status(400).json({ error: "Reason required" });
 
       await req.db.query(
-        `update client_documents
-         set status = 'rejected', rejection_reason = $1
-         where id = $2`,
+        `update client_documents set status = 'rejected', rejection_reason = $1 where id = $2`,
         [rejectionReason, documentId]
       );
+
+      // 3. ✅ EVENT: EMAIL THE CLIENT
+      if (doc.client_email) {
+        await sendEmail({
+          to: doc.client_email,
+          subject: `❌ Action Required: Document Rejected`,
+          html: `
+            <h3>Document Rejected</h3>
+            <p>Dear ${doc.client_name},</p>
+            <p>Your document <b>${doc.document_name}</b> was rejected by the auditor.</p>
+            <p style="background: #fee2e2; padding: 10px; border-left: 4px solid #dc2626;">
+              <b>Reason:</b> ${rejectionReason}
+            </p>
+            <p>Please re-upload a corrected version immediately.</p>
+          `
+        });
+      }
     }
 
     res.json({ message: `Document ${status}` });
   } catch (err) {
     console.error(err);
-    await req.db.query("ROLLBACK");
-    res.status(500).json({ error: "Verification failed" });
+    res.status(500).json({ error: "Update failed" });
   }
 });
-
+// ... (keep the rest of the file)
 /**
  * GET /firm/dashboard
  */
