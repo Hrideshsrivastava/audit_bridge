@@ -121,25 +121,20 @@ router.get("/dashboard", auth.firm, async (req, res) => {
         ca.financial_year,
 
         count(cd.id) as total_documents,
-        count(cd.id) filter (
-          where cd.status in ('submitted','verified')
-        ) as submitted_documents,
-        count(cd.id) filter (
-          where cd.status = 'verified'
-        ) as verified_documents,
-        count(cd.id) filter (
-          where cd.status = 'pending'
-          and cd.due_date < current_date
-        ) as overdue_documents
+        count(cd.id) filter (where cd.status in ('submitted','verified')) as submitted_documents,
+        count(cd.id) filter (where cd.status = 'verified') as verified_documents,
+        count(cd.id) filter (where cd.status = 'pending' and cd.due_date < current_date) as overdue_documents
 
       from clients c
       join client_audits ca on ca.client_id = c.id
       join audit_types at on at.id = ca.audit_type_id
       left join client_documents cd on cd.client_audit_id = ca.id
 
+      WHERE ca.firm_id = $1  -- ✅ ADDED: Explicitly filter by logged-in Firm ID
+
       group by c.id, ca.id, at.name
       order by c.created_at desc
-    `);
+    `, [req.firmId]); // ✅ ADDED: Pass the firmId parameter
 
     const dashboard = result.rows.map(row => ({
       clientId: row.client_id,
@@ -163,7 +158,6 @@ router.get("/dashboard", auth.firm, async (req, res) => {
     res.status(500).json({ error: "Failed to load dashboard" });
   }
 });
-
 /**
  * GET /firm/client/:clientId
  */
