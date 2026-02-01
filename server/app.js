@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
+require("./emails/emailScheduler");
 // 1. Serve Uploaded Files Staticially
 // This makes http://localhost:3000/uploads/file.pdf accessible
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
