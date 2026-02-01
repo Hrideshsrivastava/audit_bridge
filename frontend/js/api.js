@@ -1,7 +1,7 @@
 /* frontend/js/api.js */
 
 // Base URL for your backend
-const API_BASE = "https://05e44cc752155098-122-161-64-64.serveousercontent.com"; 
+const API_BASE = "https://gaye-atrabilious-kandra.ngrok-free.dev"; 
 
 export async function apiFetch(endpoint, options = {}) {
   // 1. Get the token
