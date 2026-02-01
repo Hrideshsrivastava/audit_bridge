@@ -1,7 +1,7 @@
 /* frontend/js/api.js */
 
 // Base URL for your backend
-const API_BASE = "https://plenty-socks-brush.loca.lt"; 
+const API_BASE = "https://05e44cc752155098-122-161-64-64.serveousercontent.com"; 
 
 export async function apiFetch(endpoint, options = {}) {
   // 1. Get the token
