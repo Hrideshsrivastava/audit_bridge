@@ -1,7 +1,7 @@
 /* frontend/js/api.js */
 
 // Base URL for your backend
-const API_BASE = "https://audit-bridge-1.onrender.com"; 
+const API_BASE = "https://plenty-socks-brush.loca.lt"; 
 
 export async function apiFetch(endpoint, options = {}) {
   // 1. Get the token
