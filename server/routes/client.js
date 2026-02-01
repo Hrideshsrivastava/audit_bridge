@@ -12,6 +12,8 @@ const { exec } = require("child_process");
 const { sendEmail } = require("../utils/mailer");
 
 // POST /client/document/:documentId/upload
+const pool = require("../db"); 
+
 router.post(
   "/document/:documentId/upload",
   auth.client,
@@ -22,8 +24,13 @@ router.post(
 
     if (!file) return res.status(400).json({ error: "File required" });
 
+    // We will store the fresh connection here later
+    let saveClient = null;
+
     try {
-      // 1. Get Details + FIRM EMAIL
+      // ============================================================
+      // PART 1: VALIDATION (Uses Middleware Connection req.db)
+      // ============================================================
       const docRes = await req.db.query(
         `select 
            cd.id, cd.document_name, cd.status, cd.client_audit_id, 
@@ -39,23 +46,27 @@ router.post(
       );
 
       if (docRes.rows.length === 0) return res.status(404).json({ error: "Doc not found" });
-      
-      // rows[0] means "The First Record Found" (The Object), NOT "The First Column"
-      const doc = docRes.rows[0]; 
+      const doc = docRes.rows[0];
 
       if (doc.status === "verified") return res.status(400).json({ error: "Cannot replace verified doc" });
 
+      // 🛑 CLOSE THE MIDDLEWARE TRANSACTION IMMEDIATELY
+      // This stops the timer on the first connection.
+      await req.db.query("COMMIT");
+
+
       // ============================================================
-      // 🛑 AI FILTER START
+      // PART 2: HEAVY LIFTING (AI + Upload) - NO DATABASE
       // ============================================================
       
+      // 2. Create Temp File
       const tempDir = path.join(__dirname, "../temp");
       if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-      
       const tempFilePath = path.join(tempDir, `temp_${documentId}_${Date.now()}_${file.originalname}`);
       fs.writeFileSync(tempFilePath, file.buffer);
 
-      const aiResult = await new Promise((resolve, reject) => {
+      // 3. Run AI
+      const aiResult = await new Promise((resolve) => {
         const pythonPath = path.join(__dirname, "../venv/bin/python3");
         const scriptPath = path.join(__dirname, "../scripts/ai_verifier.py");
         const safeDocName = doc.document_name.replace(/"/g, '\\"');
@@ -63,23 +74,16 @@ router.post(
         console.log(`🔎 Analyzing file: ${file.originalname}...`);
 
         exec(`"${pythonPath}" "${scriptPath}" "${tempFilePath}" "${safeDocName}"`, (error, stdout, stderr) => {
-          // Cleanup temp file
           try { fs.unlinkSync(tempFilePath); } catch (e) {}
-
-          // Log Python Debug Info (Yellow)
-          if (stderr) console.log("\x1b[33m%s\x1b[0m", stderr);
+          if (stderr) console.log("\x1b[33m%s\x1b[0m", stderr); // Log warnings
 
           if (error) {
             console.error("❌ Script Error:", error);
-            // Fallback: Allow upload if script fails
             resolve({ verdict: "YES", reason: "Script Error" }); 
           } else {
             try {
-              // ✅ PARSE THE JSON OUTPUT FROM PYTHON
-              const result = JSON.parse(stdout.trim());
-              resolve(result);
+              resolve(JSON.parse(stdout.trim()));
             } catch (e) {
-              console.error("JSON Parse Fail:", stdout);
               resolve({ verdict: "YES", reason: "Parse Error" });
             }
           }
@@ -88,18 +92,13 @@ router.post(
 
       console.log(`🤖 Decision: ${aiResult.verdict} | Reason: ${aiResult.reason}`);
 
-      // 🛑 REJECTION BLOCK
       if (aiResult.verdict === "NO") {
         return res.status(400).json({ 
-          // ✅ SEND THE AI REASON TO THE FRONTEND
-          error: aiResult.reason || "Upload rejected: Document content mismatch." 
+          error: aiResult.reason || "Upload rejected by AI." 
         });
       }
 
-      // ============================================================
-      // ✅ AI FILTER PASSED - PROCEED
-      // ============================================================
-
+      // 4. Upload to Supabase Storage
       const timestamp = Date.now();
       const fileExt = file.originalname.split('.').pop();
       const filePath = `firm_${doc.firm_id}/client_${doc.client_id}/${documentId}_${timestamp}.${fileExt}`;
@@ -112,15 +111,40 @@ router.post(
 
       const { data: urlData } = supabase.storage.from("audit-documents").getPublicUrl(filePath);
 
-      await req.db.query(
-        `update client_documents 
-         set file_url = $1, uploaded_at = now(), status = 'submitted', rejection_reason = null
-         where id = $2`,
-        [urlData.publicUrl, documentId]
-      );
 
+      // ============================================================
+      // PART 3: FINAL SAVE (USE A FRESH CONNECTION 🆕)
+      // This is the specific fix for Supabase/Timeout issues.
+      // ============================================================
+      saveClient = await pool.connect(); // 👈 New connection from the pool
+      
+      try {
+        await saveClient.query("BEGIN"); // Start fresh transaction
+        
+        // Re-apply RLS context (Required for Supabase RLS)
+        await saveClient.query("SELECT set_config('app.current_client_id', $1, true)", [req.clientId]);
+
+        // Update DB
+        await saveClient.query(
+          `update client_documents 
+           set file_url = $1, uploaded_at = now(), status = 'submitted', rejection_reason = null
+           where id = $2`,
+          [urlData.publicUrl, documentId]
+        );
+
+        await saveClient.query("COMMIT"); // Save and Close
+      } catch (saveError) {
+        await saveClient.query("ROLLBACK");
+        throw saveError;
+      } finally {
+        saveClient.release(); // 👈 Release back to pool immediately
+      }
+
+      // ============================================================
+      // PART 4: EMAIL (Fire & Forget)
+      // ============================================================
       if (doc.firm_email) {
-        await sendEmail({
+        sendEmail({
           to: doc.firm_email,
           subject: `📄 Action Required: ${doc.client_name} uploaded a document`,
           html: `
@@ -130,13 +154,15 @@ router.post(
             <p><b>AI Check:</b> Passed ✅</p>
             <p>Please log in to your dashboard to Verify or Reject this document.</p>
           `
-        });
+        }).catch(err => console.error("⚠️ Email failed (background):", err.message));
       }
 
       res.json({ message: "Uploaded successfully", url: urlData.publicUrl });
       
     } catch (err) {
       console.error(err);
+      // Clean up the middleware connection if needed
+      try { await req.db.query("ROLLBACK"); } catch (e) {} 
       res.status(500).json({ error: "Upload failed" });
     }
   }
