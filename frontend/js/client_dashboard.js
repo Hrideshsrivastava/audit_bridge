@@ -778,9 +778,9 @@ document.addEventListener("change", async (e) => {
 
       fd.append("file", file);
 
+      
 
-
-      const response = await fetch(`http://localhost:3000/client/document/${docId}/upload`, {
+     const response = await apiFetch(`/client/document/${docId}/upload`, {
 
         method: "POST",
 

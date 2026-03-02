@@ -1,7 +1,23 @@
 /* frontend/js/api.js */
 
 // Base URL for your backend
-const API_BASE = "https://gaye-atrabilious-kandra.ngrok-free.dev"; 
+let API_BASE = "http://localhost:3000"; // Fallback default
+
+export async function determineApiBase() {
+  const NGROK_URL = "https://gaye-atrabilious-kandra.ngrok-free.dev";
+  const LOCAL_URL = "http://localhost:3000";
+
+  try {
+    // Ping the root or a safe health-check endpoint
+    API_BASE = await Promise.any([
+      fetch(`${LOCAL_URL}/ping`, { method: "HEAD" }).then(() => LOCAL_URL),
+      fetch(`${NGROK_URL}/ping`, { method: "HEAD" }).then(() => NGROK_URL)
+    ]);
+  } catch (error) {
+    console.warn("Both local and ngrok servers seem to be down.");
+  }
+  return API_BASE;
+}
 
 export async function apiFetch(endpoint, options = {}) {
   // 1. Get the token
